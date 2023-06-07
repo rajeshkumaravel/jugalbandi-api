@@ -8,7 +8,14 @@ from langchain.vectorstores import FAISS
 from langchain import PromptTemplate, OpenAI, LLMChain
 from cloud_storage import *
 import shutil
+import logging
+import time
 
+logging.basicConfig(
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
+logger = logging.getLogger('jugalbandi_api')
 
 def langchain_indexing(uuid_number):
     sources = SimpleDirectoryReader(uuid_number).load_data()
@@ -85,8 +92,9 @@ def querying_with_langchain(uuid_number, query):
     return None, None, None, error_message, status_code
 
 
-def querying_with_langchain_gpt4(uuid_number, query):
-    files_count = read_langchain_index_files(uuid_number)
+async def querying_with_langchain_gpt4(uuid_number, query):
+    logger.info("Query received for UUID %s with query %s", uuid_number, query)
+    files_count = await read_langchain_index_files(uuid_number)
     if files_count == 2:
         try:
             search_index = FAISS.load_local(uuid_number, OpenAIEmbeddings())
@@ -105,13 +113,16 @@ def querying_with_langchain_gpt4(uuid_number, query):
             return res['choices'][0]['message']['content'], "", "", None, 200
 
         except openai.error.RateLimitError as e:
+            logger.info("1. 500 - OpenAI API request exceeded rate limit %s ", e)
             error_message = f"OpenAI API request exceeded rate limit: {e}"
             status_code = 500
         except (openai.error.APIError, openai.error.ServiceUnavailableError):
+            logger.info("2. 503 - Server is overloaded or unable to answer your request at the moment. Please try again later")
             error_message = "Server is overloaded or unable to answer your request at the moment. Please try again later"
             status_code = 503
         except Exception as e:
             error_message = str(e.__context__) + " and " + e.__str__()
+            logger.info("3. Exception - Exception received %s ", error_message)
             status_code = 500
     else:
         error_message = "The UUID number is incorrect"

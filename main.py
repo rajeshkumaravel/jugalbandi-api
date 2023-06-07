@@ -278,7 +278,7 @@ async def get_source_document(query_string: str = "", input_language: DropDownIn
 @app.get("/query-with-langchain-gpt4", tags=["Q&A over Document Store"])
 async def query_using_langchain_with_gpt4(uuid_number: str, query_string: str) -> Response:
     load_dotenv()
-    answer, source_text, paraphrased_query, error_message, status_code = querying_with_langchain_gpt4(uuid_number,
+    answer, source_text, paraphrased_query, error_message, status_code = await querying_with_langchain_gpt4(uuid_number,
                                                                                                       query_string)
 
     if status_code != 200:

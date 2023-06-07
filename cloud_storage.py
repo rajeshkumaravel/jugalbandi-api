@@ -3,6 +3,14 @@ from google.oauth2 import service_account
 from dotenv import load_dotenv
 import os
 
+import logging
+import time
+
+logging.basicConfig(
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
+logger = logging.getLogger('jugalbandi_api')
 
 def cloud_authentication():
     load_dotenv()
@@ -47,6 +55,7 @@ def read_files(uuid_number):
 
 
 def read_langchain_index_files(uuid_number):
+    logger.info("Reading file from UUID %s ", uuid_number)
     bucket = cloud_authentication()
     folder_name = "generic_qa/" + uuid_number + "/"
     blobs = list(bucket.list_blobs(prefix=folder_name))
