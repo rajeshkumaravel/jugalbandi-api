@@ -94,7 +94,7 @@ def querying_with_langchain(uuid_number, query):
 
 async def querying_with_langchain_gpt4(uuid_number, query):
     logger.info("Query received for UUID %s with query %s", uuid_number, query)
-    files_count = await read_langchain_index_files(uuid_number)
+    files_count = read_langchain_index_files(uuid_number)
     if files_count == 2:
         try:
             search_index = FAISS.load_local(uuid_number, OpenAIEmbeddings())
