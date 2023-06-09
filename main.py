@@ -14,6 +14,14 @@ import shutil
 from zipfile import ZipFile
 from query_with_tfidf import querying_with_tfidf
 
+import logging
+import time
+
+logging.basicConfig(
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
+logger = logging.getLogger('jugalbandi_api')
 
 api_description = """
 Jugalbandi.ai has a vector datastore that allows you to get factual Q&A over a document set.
@@ -90,10 +98,10 @@ async def root():
 async def query_using_gptindex(uuid_number: str, query_string: str) -> Response:
     load_dotenv()
     answer, source_text, error_message, status_code = querying_with_gptindex(uuid_number, query_string)
-    engine = await create_engine()
-    await insert_qa_logs(engine=engine, model_name="gpt-index", uuid_number=uuid_number, query=query_string,
-                         paraphrased_query=None, response=answer, source_text=source_text, error_message=error_message)
-    await engine.close()
+    # engine = await create_engine()
+    # await insert_qa_logs(engine=engine, model_name="gpt-index", uuid_number=uuid_number, query=query_string,
+    #                      paraphrased_query=None, response=answer, source_text=source_text, error_message=error_message)
+    # await engine.close()
     if status_code != 200:
         raise HTTPException(status_code=status_code, detail=error_message)
 
@@ -109,11 +117,11 @@ async def query_using_langchain(uuid_number: str, query_string: str) -> Response
     load_dotenv()
     answer, source_text, paraphrased_query, error_message, status_code = querying_with_langchain(uuid_number,
                                                                                                  query_string)
-    engine = await create_engine()
-    await insert_qa_logs(engine=engine, model_name="langchain", uuid_number=uuid_number, query=query_string,
-                         paraphrased_query=paraphrased_query, response=answer, source_text=source_text,
-                         error_message=error_message)
-    await engine.close()
+    # engine = await create_engine()
+    # await insert_qa_logs(engine=engine, model_name="langchain", uuid_number=uuid_number, query=query_string,
+    #                      paraphrased_query=paraphrased_query, response=answer, source_text=source_text,
+    #                      error_message=error_message)
+    # await engine.close()
     if status_code != 200:
         raise HTTPException(status_code=status_code, detail=error_message)
 
@@ -163,11 +171,13 @@ async def upload_files(description: str, files: List[UploadFile] = File(...)):
     if status_code == 200:
         error_message, status_code = langchain_indexing(uuid_number)
 
-    engine = await create_engine()
-    await insert_document_store_logs(engine=engine, description=description, uuid_number=uuid_number,
-                                     documents_list=files_list, error_message=error_message)
-    await engine.close()
+    # engine = await create_engine()
+    # await insert_document_store_logs(engine=engine, description=description, uuid_number=uuid_number,
+    #                                  documents_list=files_list, error_message=error_message)
+    # await engine.close()
 
+    logger.info("jugalbandi :: upload file - %s", description)
+    logger.info("jugalbandi :: upload file error - %s", error_message)
     if status_code != 200:
         raise HTTPException(status_code=status_code, detail=error_message)
 
@@ -231,13 +241,13 @@ async def query_with_voice_input(uuid_number: str, input_language: DropDownInput
         else:
             status_code = 503
 
-    engine = await create_engine()
-    await insert_qa_voice_logs(engine=engine, uuid_number=uuid_number, input_language=input_language.value,
-                               output_format=output_medium, query=query_text, query_in_english=text,
-                               paraphrased_query=paraphrased_query, response=regional_answer,
-                               response_in_english=answer,
-                               audio_output_link=audio_output_url, source_text=source_text, error_message=error_message)
-    await engine.close()
+    # engine = await create_engine()
+    # await insert_qa_voice_logs(engine=engine, uuid_number=uuid_number, input_language=input_language.value,
+    #                            output_format=output_medium, query=query_text, query_in_english=text,
+    #                            paraphrased_query=paraphrased_query, response=regional_answer,
+    #                            response_in_english=answer,
+    #                            audio_output_link=audio_output_url, source_text=source_text, error_message=error_message)
+    # await engine.close()
     if status_code != 200:
         raise HTTPException(status_code=status_code, detail=error_message)
 
