@@ -8,7 +8,14 @@ from langchain.vectorstores import FAISS
 from langchain import PromptTemplate, OpenAI, LLMChain
 from cloud_storage import *
 import shutil
+import logging
+import time
 
+logging.basicConfig(
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
+logger = logging.getLogger('jugalbandi_api')
 
 def langchain_indexing(uuid_number):
     sources = SimpleDirectoryReader(uuid_number).load_data()

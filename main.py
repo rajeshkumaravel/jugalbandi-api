@@ -18,7 +18,13 @@ from fastapi.responses import Response
 
 from sse_starlette.sse import EventSourceResponse
 import logging
-logger = logging.getLogger("jugalbandi")
+import time
+
+logging.basicConfig(
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
+logger = logging.getLogger('jugalbandi_api')
 
 api_description = """
 Jugalbandi.ai has a vector datastore that allows you to get factual Q&A over a document set.
@@ -135,7 +141,7 @@ async def query_using_langchain(uuid_number: str, query_string: str) -> Response
         load_dotenv()
         answer, source_text, paraphrased_query, error_message, status_code = querying_with_langchain(uuid_number,
                                                                                                     query_string)
-        print(engine, "langchain", uuid_number, query_string, paraphrased_query, answer, source_text,)
+        print("langchain", uuid_number, query_string, paraphrased_query, answer, source_text,)
         if status_code != 200:
             raise HTTPException(status_code=status_code, detail=error_message)
 
@@ -186,11 +192,13 @@ async def upload_files(description: str, files: List[UploadFile] = File(...)):
     if status_code == 200:
         error_message, status_code = langchain_indexing(uuid_number)
 
-    engine = await create_engine()
-    await insert_document_store_logs(engine=engine, description=description, uuid_number=uuid_number,
-                                     documents_list=files_list, error_message=error_message)
-    await engine.close()
+    # engine = await create_engine()
+    # await insert_document_store_logs(engine=engine, description=description, uuid_number=uuid_number,
+    #                                  documents_list=files_list, error_message=error_message)
+    # await engine.close()
 
+    logger.info("jugalbandi :: upload file - %s", description)
+    logger.info("jugalbandi :: upload file error - %s", error_message)
     if status_code != 200:
         raise HTTPException(status_code=status_code, detail=error_message)
 
