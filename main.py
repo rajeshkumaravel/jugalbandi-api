@@ -17,6 +17,8 @@ from query_with_tfidf import querying_with_tfidf
 from fastapi.responses import Response
 
 from sse_starlette.sse import EventSourceResponse
+import logging
+logger = logging.getLogger("jugalbandi")
 
 api_description = """
 Jugalbandi.ai has a vector datastore that allows you to get factual Q&A over a document set.
@@ -244,21 +246,24 @@ async def query_with_voice_input(uuid_number: str, input_language: DropDownInput
                             output_file.close()
                             os.remove(output_file.name)
                         else:
-                            status_code = 503
+                            logger.info("Error while converting text to audio")
+                            # By passing error code to hot_fix - TODO
+                            # status_code = 503
                     else:
+                        logger.info("Error while converting text to audio 3")
                         audio_output_url = ""
                 else:
                     status_code = 503
         else:
             status_code = 503
 
-    engine = await create_engine()
-    await insert_qa_voice_logs(engine=engine, uuid_number=uuid_number, input_language=input_language.value,
-                               output_format=output_medium, query=query_text, query_in_english=text,
-                               paraphrased_query=paraphrased_query, response=regional_answer,
-                               response_in_english=answer,
-                               audio_output_link=audio_output_url, source_text=source_text, error_message=error_message)
-    await engine.close()
+    # engine = await create_engine()
+    # await insert_qa_voice_logs(engine=engine, uuid_number=uuid_number, input_language=input_language.value,
+    #                            output_format=output_medium, query=query_text, query_in_english=text,
+    #                            paraphrased_query=paraphrased_query, response=regional_answer,
+    #                            response_in_english=answer,
+    #                            audio_output_link=audio_output_url, source_text=source_text, error_message=error_message)
+    # await engine.close()
     if status_code != 200:
         raise HTTPException(status_code=status_code, detail=error_message)
 

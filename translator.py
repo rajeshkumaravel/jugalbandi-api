@@ -43,7 +43,10 @@ def google_speech_to_text(wav_file_content, input_language):
         sample_rate_hertz=16000,
         language_code=language_code,
     )
-    response = client.recognize(config=config, audio=audio)
+    # response = client.recognize(config=config, audio=audio)
+    response = client.long_running_recognize(
+        request={"config": config, "audio": audio}
+    )
     return response.results[0].alternatives[0].transcript
 
 def speech_to_text(encoded_string, input_language):
@@ -100,23 +103,21 @@ def google_text_to_speech(text, language):
         audio_config = texttospeech.AudioConfig(
             audio_encoding=texttospeech.AudioEncoding.MP3
         )
-        response = client.synthesize_speech(
-            request={"input": input_text, "voice": voice, "audio_config": audio_config}
-        )
+        response = client.synthesize_speech(input_text, voice, audio_config)
         audio_content = response.audio_content
     except:
         audio_content = None
     return audio_content
 
 def text_to_speech(language, text, gender='female'):
-    try:
-        api_url = "https://tts-api.ai4bharat.org/"
-        payload = {"input": [{"source": text}], "config": {"gender": gender, "language": {"sourceLanguage": language}}}
-        response = requests.post(api_url, json=payload, timeout=60)
-        audio_content = response.json()['audio'][0]['audioContent']
-        audio_content = base64.b64decode(audio_content)
-    except:
-        audio_content = google_text_to_speech(text, language)
+    # try:
+    #     api_url = "https://tts-api.ai4bharat.org/"
+    #     payload = {"input": [{"source": text}], "config": {"gender": gender, "language": {"sourceLanguage": language}}}
+    #     response = requests.post(api_url, json=payload, timeout=60)
+    #     audio_content = response.json()['audio'][0]['audioContent']
+    #     audio_content = base64.b64decode(audio_content)
+    # except:
+    audio_content = google_text_to_speech(text, language)
     return audio_content
 
 def audio_input_to_text(audio_file, input_language):
