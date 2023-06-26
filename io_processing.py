@@ -39,15 +39,18 @@ def process_incoming_text(regional_text, input_language):
 
 
 def process_outgoing_text(english_text, input_language):
-    logger.info(english_text)
     error_message = None
-    # try:
-    #     regional_text = indic_translation(text=english_text, source='en', destination=input_language)
-    # except:
-    #     error_message = "English translation to indic language failed"
-    #     logger.info(error_message)
-    #     regional_text = None
-    return english_text, error_message
+    logger.info("incoming language %s", input_language)
+    if input_language == 'en':
+        return english_text, error_message
+    else:
+        try:
+            regional_text = indic_translation(text=english_text, source='en', destination=input_language)
+        except:
+            error_message = "English translation to indic language failed"
+            logger.info(error_message)
+            regional_text = None
+        return regional_text, error_message
 
 
 def process_outgoing_voice(message, input_language):
